@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Spotify-Clone-With-Flutter-main",
+            "cwd": "Spotify-Clone-With-Flutter-main",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "Spotify-Clone-With-Flutter-main (profile mode)",
+            "cwd": "Spotify-Clone-With-Flutter-main",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "Spotify-Clone-With-Flutter-main (release mode)",
+            "cwd": "Spotify-Clone-With-Flutter-main",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
