@@ -1,3 +1,4 @@
+// presentation/profile/pages/profile.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/common/helpers/is_dark_mode.dart';
@@ -8,10 +9,9 @@ import 'package:spotify/presentation/profile/bloc/favorite_songs_state.dart';
 import 'package:spotify/presentation/profile/bloc/profile_info_cubit.dart';
 import 'package:spotify/presentation/song_player/pages/song_player.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../../common/widgets/favorite_button/favorite_button.dart';
-import '../../../core/configs/constants/app_urls.dart';
-import '../bloc/profile_info_state.dart';
+import 'package:spotify/common/widgets/favorite_button/favorite_button.dart';
+import 'package:spotify/core/configs/constants/app_urls.dart';
+import 'package:spotify/presentation/profile/bloc/profile_info_state.dart';
 import 'package:spotify/presentation/intro/pages/get_started.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -22,7 +22,7 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: const BasicAppbar(
         backgroundColor: Color(0xff2C2B2B),
-        title: Text('Profile'),
+        title: Text('Hồ sơ'),
       ),
       body: SafeArea(
         child: Column(
@@ -78,15 +78,17 @@ class ProfilePage extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(
-                        image: NetworkImage(state.userEntity.imageurl!),
+                        image: NetworkImage(
+                          state.userEntity.imageurl ?? 'https://via.placeholder.com/90',
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Text(state.userEntity.email!),
+                  Text(state.userEntity.email ?? 'Không có email'),
                   const SizedBox(height: 10),
                   Text(
-                    state.userEntity.fullname!,
+                    state.userEntity.fullname ?? 'Không có tên',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -95,11 +97,10 @@ class ProfilePage extends StatelessWidget {
                 ],
               );
             }
-
             if (state is ProfileInfoFailure) {
-              return const Text('Please try again');
+              return const Center(child: Text('Lỗi khi tải thông tin. Vui lòng thử lại.'));
             }
-            return Container();
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -114,7 +115,10 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('FAVORITE SONGS'),
+            const Text(
+              'BÀI HÁT YÊU THÍCH',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 20),
             BlocBuilder<FavoriteSongsCubit, FavoriteSongsState>(
               builder: (context, state) {
@@ -122,6 +126,9 @@ class ProfilePage extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is FavoriteSongsLoaded) {
+                  if (state.favoriteSongs.isEmpty) {
+                    return const Center(child: Text('Chưa có bài hát yêu thích.'));
+                  }
                   return ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -150,7 +157,7 @@ class ProfilePage extends StatelessWidget {
                                     image: DecorationImage(
                                       image: NetworkImage(
                                         AppURLs.getCoverURL(
-                                          '${state.favoriteSongs[index].filename}',
+                                          state.favoriteSongs[index].filename ?? '',
                                         ),
                                       ),
                                       fit: BoxFit.cover,
@@ -158,41 +165,45 @@ class ProfilePage extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      state.favoriteSongs[index].title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state.favoriteSongs[index].title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      state.favoriteSongs[index].artist,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 11,
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        state.favoriteSongs[index].artist,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 11,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                             Row(
                               children: [
-                                Text(state.favoriteSongs[index].duration
-                                    .toString()
-                                    .replaceAll('.', ':')),
+                                Text(
+                                  state.favoriteSongs[index].duration
+                                      .toString()
+                                      .replaceAll('.', ':'),
+                                ),
                                 const SizedBox(width: 20),
                                 FavoriteButton(
                                   songEntity: state.favoriteSongs[index],
                                   key: UniqueKey(),
                                   function: () {
-                                    context
-                                        .read<FavoriteSongsCubit>()
-                                        .removeSong(index);
+                                    context.read<FavoriteSongsCubit>().removeSong(index);
                                   },
                                 ),
                               ],
@@ -201,15 +212,14 @@ class ProfilePage extends StatelessWidget {
                         ),
                       );
                     },
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 20),
+                    separatorBuilder: (context, index) => const SizedBox(height: 20),
                     itemCount: state.favoriteSongs.length,
                   );
                 }
                 if (state is FavoriteSongsFailure) {
-                  return const Text('Please try again.');
+                  return const Center(child: Text('Lỗi khi tải bài hát yêu thích.'));
                 }
-                return Container();
+                return const SizedBox.shrink();
               },
             ),
           ],
@@ -219,34 +229,36 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _logoutButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ElevatedButton(
-          onPressed: () async {
-            await Supabase.instance.client.auth.signOut();
-
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const GetStartedPage(),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: const Text(
-            'Logout',
-            style: TextStyle(fontSize: 18),
-          ),
+    return ElevatedButton(
+      onPressed: () async {
+        try {
+          await Supabase.instance.client.auth.signOut();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const GetStartedPage()),
+            (route) => false,
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi đăng xuất: $e')),
+          );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
+        minimumSize: const Size(double.infinity, 50),
+      ),
+      child: const Text(
+        'Đăng xuất',
+        style: TextStyle(fontSize: 18, color: Colors.white),
       ),
     );
   }
 }
+
+
+// Phi Đen
