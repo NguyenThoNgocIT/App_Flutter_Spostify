@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:spotify/data/models/song/song.dart';
+import 'package:spotify/data/models/song/album.dart';
 import 'package:spotify/domain/entities/song/song.dart';
+import 'package:spotify/domain/entities/song/album.dart';
 import 'package:spotify/domain/usecases/song/is_favorite_song.dart';
-import '../../../service_locator.dart';
+import 'package:spotify/service_locator.dart';
 
 abstract class SongSupabaseService {
   Future<Either<String, List<SongEntity>>> getNewsSongs();
@@ -11,9 +13,11 @@ abstract class SongSupabaseService {
   Future<Either<String, bool>> addOrRemoveFavoriteSong(String songId);
   Future<bool> isFavoriteSong(String songId);
   Future<Either<String, List<SongEntity>>> getUserFavoriteSongs();
+  Future<Either<String, List<AlbumEntity>>> getAlbums();
+  Future<Either<String, List<SongEntity>>> getAlbumSongs(String albumId);
 }
 
-class SongSupabaseServiceImpl extends SongSupabaseService {
+class SongSupabaseServiceImpl implements SongSupabaseService {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
 
   @override
@@ -23,12 +27,11 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
           .from('Songs')
           .select()
           .order('releasedate', ascending: false)
-          .limit(3);
+          .limit(10);
 
       final songs = await Future.wait(data.map((element) async {
         var songModel = SongModel.fromJson(Map<String, dynamic>.from(element));
-        bool isfavorite =
-            await sl<IsFavoriteSongUseCase>().call(params: element['id']);
+        bool isfavorite = await sl<IsFavoriteSongUseCase>().call(params: element['id']);
         songModel.isfavorite = isfavorite;
         songModel.songid = element['id'];
         return songModel.toEntity();
@@ -37,7 +40,7 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
       return Right(songs);
     } catch (e) {
       print('Error in getNewsSongs: $e');
-      return Left('Failed to fetch new songs: $e');
+      return Left('Không thể tải bài hát mới: $e');
     }
   }
 
@@ -48,12 +51,10 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
           .from('Songs')
           .select()
           .order('releasedate', ascending: false);
-      print("Songs + $data");
 
       final songs = await Future.wait(data.map((element) async {
         var songModel = SongModel.fromJson(Map<String, dynamic>.from(element));
-        bool isfavorite =
-            await sl<IsFavoriteSongUseCase>().call(params: element['id']);
+        bool isfavorite = await sl<IsFavoriteSongUseCase>().call(params: element['id']);
         songModel.isfavorite = isfavorite;
         songModel.songid = element['id'];
         return songModel.toEntity();
@@ -62,7 +63,7 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
       return Right(songs);
     } catch (e) {
       print('Error in getPlayList: $e');
-      return Left('Failed to fetch playlist: $e');
+      return Left('Không thể tải danh sách phát: $e');
     }
   }
 
@@ -71,7 +72,7 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
     try {
       final user = _supabaseClient.auth.currentUser;
       if (user == null) {
-        return Left('User not authenticated');
+        return Left('Người dùng chưa xác thực');
       }
 
       String uId = user.id;
@@ -103,7 +104,7 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
       return Right(isFavorite);
     } catch (e) {
       print('Error in addOrRemoveFavoriteSong: $e');
-      return Left('Failed to add/remove favorite: $e');
+      return Left('Không thể thêm/xóa bài hát yêu thích: $e');
     }
   }
 
@@ -135,24 +136,27 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
     try {
       final user = _supabaseClient.auth.currentUser;
       if (user == null) {
-        return Left('Người dùng chưa được xác thực');
+        return Left('Người dùng chưa xác thực');
       }
 
       String uId = user.id;
-      final favorites =
-          await _supabaseClient.from('Favorites').select().eq('userid', uId);
+      final favorites = await _supabaseClient
+          .from('Favorites')
+          .select()
+          .eq('userid', uId);
       final songIds = favorites.map((e) => e['songid']).toList();
 
       if (songIds.isEmpty) {
         return Right([]);
       }
 
-      final songs =
-          await _supabaseClient.from('Songs').select().inFilter('id', songIds);
+      final songs = await _supabaseClient
+          .from('Songs')
+          .select()
+          .inFilter('id', songIds);
 
       List<SongEntity> favoriteSongs = songs.map((song) {
-        SongModel songModel =
-            SongModel.fromJson(Map<String, dynamic>.from(song));
+        SongModel songModel = SongModel.fromJson(Map<String, dynamic>.from(song));
         songModel.isfavorite = true;
         songModel.songid = song['id'];
         return songModel.toEntity();
@@ -161,7 +165,62 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
       return Right(favoriteSongs);
     } catch (e) {
       print('Error in getUserFavoriteSongs: $e');
-      return Left('Failed to fetch favorite songs: $e');
+      return Left('Không thể tải bài hát yêu thích: $e');
     }
   }
+
+  @override
+  Future<Either<String, List<AlbumEntity>>> getAlbums() async {
+    try {
+      final data = await _supabaseClient
+          .from('albums')
+          .select()
+          .order('releasedate', ascending: false)
+          .limit(10);
+
+      final albums = data.map((element) {
+        return AlbumModel.fromJson(Map<String, dynamic>.from(element)).toEntity();
+      }).toList();
+
+      return Right(albums);
+    } catch (e) {
+      print('Error in getAlbums: $e');
+      return Left('Không thể tải danh sách album: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, List<SongEntity>>> getAlbumSongs(String albumId) async {
+    try {
+      final albumSongs = await _supabaseClient
+          .from('album_songs')
+          .select('song_id')
+          .eq('album_id', albumId);
+
+      final songIds = albumSongs.map((e) => e['song_id']).toList();
+
+      if (songIds.isEmpty) {
+        return Right([]);
+      }
+
+      final songsData = await _supabaseClient
+          .from('Songs')
+          .select()
+          .inFilter('id', songIds);
+
+      final songs = await Future.wait(songsData.map((element) async {
+        var songModel = SongModel.fromJson(Map<String, dynamic>.from(element));
+        bool isfavorite = await sl<IsFavoriteSongUseCase>().call(params: element['id']);
+        songModel.isfavorite = isfavorite;
+        songModel.songid = element['id'];
+        return songModel.toEntity();
+      }));
+
+      return Right(songs);
+    } catch (e) {
+      print('Error in getAlbumSongs: $e');
+      return Left('Không thể tải bài hát của album: $e');
+    }
+  }
+  
 }

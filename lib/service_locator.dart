@@ -14,6 +14,8 @@ import 'data/repository/song/song_repository_impl.dart';
 import 'data/sources/song/song_supabase_service.dart';
 import 'domain/repository/song/song.dart';
 import 'domain/usecases/auth/sigin.dart';
+import 'package:spotify/domain/usecases/song/get_albums.dart';
+import 'package:spotify/domain/usecases/song/get_album_songs.dart';
 
 final sl = GetIt.instance;
 
@@ -38,4 +40,6 @@ Future<void> initializeDependencies() async {
       AddOrRemoveFavoriteSongUseCase());
   sl.registerSingleton<IsFavoriteSongUseCase>(IsFavoriteSongUseCase());
   sl.registerSingleton<GetFavoriteSongsUseCase>(GetFavoriteSongsUseCase());
+  sl.registerSingleton<GetAlbumsUseCase>(GetAlbumsUseCase());
+  sl.registerSingleton<GetAlbumSongsUseCase>(GetAlbumSongsUseCase());
 }

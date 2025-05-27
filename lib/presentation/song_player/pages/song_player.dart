@@ -5,9 +5,11 @@ import 'package:spotify/domain/entities/song/song.dart';
 import 'package:spotify/presentation/song_player/bloc/song_player_cubit.dart';
 import 'package:spotify/presentation/song_player/bloc/song_player_state.dart';
 
+
 import '../../../common/widgets/favorite_button/favorite_button.dart';
 import '../../../core/configs/constants/app_urls.dart';
 import '../../../core/configs/theme/app_colors.dart';
+
 
 class SongPlayerPage extends StatelessWidget {
   final SongEntity songEntity;
@@ -28,7 +30,7 @@ class SongPlayerPage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (_) => SongPlayerCubit()
-          ..loadSong(AppURLs.getSongURL('${songEntity.coverfilename}')),
+          ..loadSong(AppURLs.getSongURL(songEntity.filename ?? '')),
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           child: Column(
@@ -42,26 +44,29 @@ class SongPlayerPage extends StatelessWidget {
           ),
         ),
       ),
+
     );
   }
 
   Widget _songCover() {
-    print(
-      "Network: " + AppURLs.getCoverURL('${(songEntity.filename)}'),
-    );
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: NetworkImage(
-            AppURLs.getCoverURL('${(songEntity.filename)}'),
-          ),
-        ),
+  final coverURL = songEntity.coverfilename?.isNotEmpty == true
+      ? AppURLs.getCoverURL(songEntity.coverfilename!)
+      : AppURLs.defaultImage;
+
+  print('Cover image URL: $coverURL');
+
+  return Container(
+    height: 300,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(30),
+      image: DecorationImage(
+        fit: BoxFit.cover,
+        image: NetworkImage(coverURL),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _songDetail() {
     return Row(
