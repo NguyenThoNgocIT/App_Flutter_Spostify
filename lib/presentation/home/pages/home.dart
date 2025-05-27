@@ -6,6 +6,7 @@ import 'package:spotify/core/configs/theme/app_colors.dart';
 import 'package:spotify/presentation/home/widgets/news_songs.dart';
 import 'package:spotify/presentation/home/widgets/play_list.dart';
 import 'package:spotify/presentation/profile/pages/profile.dart';
+import 'package:spotify/presentation/home/widgets/podcasts.dart';
 
 import '../../../common/widgets/appbar/app_bar.dart';
 import '../../../core/configs/assets/app_vectors.dart';
@@ -60,7 +61,7 @@ class _HomePageState extends State<HomePage>
                   const NewsSongs(),
                   Container(),
                   Container(),
-                  Container()
+                  const Podcasts()
                 ],
               ),
             ),
