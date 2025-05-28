@@ -4,6 +4,8 @@ import 'package:spotify/data/models/song/song.dart';
 import 'package:spotify/domain/entities/song/song.dart';
 import 'package:spotify/domain/usecases/song/is_favorite_song.dart';
 import '../../../service_locator.dart';
+import 'package:spotify/data/models/podcast/podcast.dart';
+import 'package:spotify/domain/entities/podcast/podcast.dart';
 
 abstract class SongSupabaseService {
   Future<Either<String, List<SongEntity>>> getNewsSongs();
@@ -11,6 +13,7 @@ abstract class SongSupabaseService {
   Future<Either<String, bool>> addOrRemoveFavoriteSong(String songId);
   Future<bool> isFavoriteSong(String songId);
   Future<Either<String, List<SongEntity>>> getUserFavoriteSongs();
+  Future<Either<String, List<PodcastEntity>>> getPodcasts();
 }
 
 class SongSupabaseServiceImpl extends SongSupabaseService {
@@ -162,6 +165,29 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
     } catch (e) {
       print('Error in getUserFavoriteSongs: $e');
       return Left('Failed to fetch favorite songs: $e');
+    }
+  }
+
+  // podcast
+  @override
+  Future<Either<String, List<PodcastEntity>>> getPodcasts() async {
+    try {
+      final data = await _supabaseClient
+          .from('Podcasts')
+          .select()
+          .order('releasedate', ascending: false);
+      print('Raw data from Supabase: $data');
+      final podcasts = data.map((element) {
+        var podcastModel =
+            PodcastModel.fromJson(Map<String, dynamic>.from(element));
+        podcastModel.podcastid = element['id'];
+        return podcastModel.toEntity();
+      }).toList();
+      print('Parsed podcasts: $podcasts');
+      return Right(podcasts);
+    } catch (e) {
+      print('Error in getPodcasts: $e');
+      return Left('Failed to fetch podcasts: $e');
     }
   }
 }
