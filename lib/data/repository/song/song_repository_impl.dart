@@ -4,6 +4,7 @@ import 'package:spotify/domain/entities/song/song.dart';
 import 'package:spotify/domain/entities/song/album.dart';
 import 'package:spotify/domain/repository/song/song.dart';
 import 'package:spotify/service_locator.dart';
+import 'package:spotify/domain/entities/song/artist.dart';
 
 class SongRepositoryImpl extends SongsRepository {
   @override
@@ -39,5 +40,16 @@ class SongRepositoryImpl extends SongsRepository {
   @override
   Future<Either<String, List<SongEntity>>> getAlbumSongs(String albumId) async {
     return await sl<SongSupabaseService>().getAlbumSongs(albumId);
+  }
+
+  // ====== ARTIST FUNCTIONS (mới thêm) ======
+  @override
+  Future<Either<String, List<ArtistEntity>>> getArtists() async {
+    return await sl<SongSupabaseService>().getArtists();
+  }
+
+  @override
+  Future<Either<String, ArtistEntity>> getArtistById(String id) async {
+    return await sl<SongSupabaseService>().getArtistById(id);
   }
 }

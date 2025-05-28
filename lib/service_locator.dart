@@ -21,6 +21,8 @@ import 'domain/repository/podcast/podcast.dart';
 import 'domain/usecases/auth/sigin.dart';
 import 'package:spotify/domain/usecases/song/get_albums.dart';
 import 'package:spotify/domain/usecases/song/get_album_songs.dart';
+import 'package:spotify/domain/usecases/song/get_artist_by_id.dart'; // công
+import 'package:spotify/domain/usecases/song/get_artists.dart'; // công
 
 final sl = GetIt.instance;
 
@@ -52,4 +54,10 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<PodcastSupabaseService>(PodcastSupabaseServiceImpl());
   sl.registerSingleton<PodcastsRepository>(PodcastRepositoryImpl());
   sl.registerSingleton<GetPodcastsUseCase>(GetPodcastsUseCase());
+
+  // Register artist use cases
+  sl.registerSingleton<GetArtistsUseCase>(
+      GetArtistsUseCase(sl<SongSupabaseService>())); // công
+  sl.registerSingleton<GetArtistByIdUseCase>(
+      GetArtistByIdUseCase(sl<SongSupabaseService>())); // công
 }

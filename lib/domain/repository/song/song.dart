@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:spotify/domain/entities/song/song.dart';
 import 'package:spotify/domain/entities/song/album.dart';
+import 'package:spotify/domain/entities/song/artist.dart';
 
 abstract class SongsRepository {
   Future<Either<String, List<SongEntity>>> getNewsSongs();
@@ -10,4 +11,5 @@ abstract class SongsRepository {
   Future<Either<String, List<SongEntity>>> getUserFavoriteSongs();
   Future<Either<String, List<AlbumEntity>>> getAlbums();
   Future<Either<String, List<SongEntity>>> getAlbumSongs(String albumId);
+  Future<Either<String, List<ArtistEntity>>> getArtists();
 }

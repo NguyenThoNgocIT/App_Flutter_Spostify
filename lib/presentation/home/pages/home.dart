@@ -12,7 +12,7 @@ import 'package:spotify/presentation/home/widgets/album.dart';
 import 'package:spotify/presentation/home/widgets/podcasts.dart';
 import '../../../common/widgets/appbar/app_bar.dart';
 import 'package:spotify/presentation/search/pages/search_page.dart';
-import 'package:spotify/presentation/search/pages/search_page.dart';
+import 'package:spotify/presentation/home/widgets/artist_list_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,7 +69,9 @@ class _HomePageState extends State<HomePage>
                 children: [
                   const NewsSongs(),
                   const Album(),
+                  const ArtistListPage(),
                   const Podcasts(),
+                  Container(),
                   Container(),
                   Container(),
                   Container(),
