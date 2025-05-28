@@ -6,6 +6,7 @@ import 'package:spotify/core/configs/theme/app_colors.dart';
 import 'package:spotify/presentation/home/widgets/news_songs.dart';
 import 'package:spotify/presentation/home/widgets/play_list.dart';
 import 'package:spotify/presentation/profile/pages/profile.dart';
+import 'package:spotify/presentation/home/widgets/artist_list_page.dart';
 
 import '../../../common/widgets/appbar/app_bar.dart';
 import '../../../core/configs/assets/app_vectors.dart';
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   const NewsSongs(),
                   Container(),
-                  Container(),
+                  const ArtistListPage(),  // // công,
                   Container()
                 ],
               ),

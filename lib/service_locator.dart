@@ -15,6 +15,9 @@ import 'data/sources/song/song_supabase_service.dart';
 import 'domain/repository/song/song.dart';
 import 'domain/usecases/auth/sigin.dart';
 
+import 'package:spotify/domain/usecases/song/get_artist_by_id.dart'; // công
+import 'package:spotify/domain/usecases/song/get_artists.dart'; // công
+
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
@@ -38,4 +41,8 @@ Future<void> initializeDependencies() async {
       AddOrRemoveFavoriteSongUseCase());
   sl.registerSingleton<IsFavoriteSongUseCase>(IsFavoriteSongUseCase());
   sl.registerSingleton<GetFavoriteSongsUseCase>(GetFavoriteSongsUseCase());
+
+  // Register artist use cases
+  sl.registerSingleton<GetArtistsUseCase>(GetArtistsUseCase(sl<SongSupabaseService>())); // công
+  sl.registerSingleton<GetArtistByIdUseCase>(GetArtistByIdUseCase(sl<SongSupabaseService>())); // công
 }

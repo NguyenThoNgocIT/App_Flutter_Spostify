@@ -4,6 +4,8 @@ import 'package:spotify/data/models/song/song.dart';
 import 'package:spotify/domain/entities/song/song.dart';
 import 'package:spotify/domain/usecases/song/is_favorite_song.dart';
 import '../../../service_locator.dart';
+import 'package:spotify/data/models/song/artists.dart'; // công
+import 'package:spotify/domain/entities/song/artist.dart'; // công
 
 abstract class SongSupabaseService {
   Future<Either<String, List<SongEntity>>> getNewsSongs();
@@ -11,6 +13,11 @@ abstract class SongSupabaseService {
   Future<Either<String, bool>> addOrRemoveFavoriteSong(String songId);
   Future<bool> isFavoriteSong(String songId);
   Future<Either<String, List<SongEntity>>> getUserFavoriteSongs();
+  Future<Either<String, List<ArtistEntity>>> getArtists();// công
+  Future<Either<String, ArtistEntity>> getArtistById(String id); // công
+
+
+
 }
 
 class SongSupabaseServiceImpl extends SongSupabaseService {
@@ -164,4 +171,58 @@ class SongSupabaseServiceImpl extends SongSupabaseService {
       return Left('Failed to fetch favorite songs: $e');
     }
   }
+
+
+
+
+  @override
+  Future<Either<String, List<ArtistEntity>>> getArtists() async { // công
+    try {
+      final data = await _supabaseClient
+          .from('artists')
+          .select('*, song_artists!inner(song_id, Songs(*))');
+
+      final artists = data.map<ArtistEntity>((element) {
+        final model = ArtistModel.fromJson(Map<String, dynamic>.from(element));
+        return model.toEntity();
+      }).toList();
+
+      return Right(artists);
+    } catch (e) {
+      print('Error in getArtists: $e');
+      return Left('Failed to fetch artists: $e');
+    }
+  }
+@override
+Future<Either<String, ArtistEntity>> getArtistById(String id) async {
+  try {
+    final data = await _supabaseClient
+        .from('artists')
+        .select('''
+          *,
+          song_artists(
+            song: Songs(songid, title, releasedate, coverfilename)
+          )
+        ''')
+        .eq('id', id)
+        .single();
+
+    // Debug: Print raw data
+    print('Raw data from Supabase: $data');
+
+    final artist = ArtistModel.fromJson(Map<String, dynamic>.from(data));
+    final artistEntity = artist.toEntity();
+
+    // Debug: Print artist and songs
+    print('Artist: ${artistEntity.name}, Songs: ${artistEntity.songs.length}');
+    for (var song in artistEntity.songs) {
+      print('Song: ${song.title}');
+    }
+
+    return Right(artistEntity);
+  } catch (e) {
+    print('Error in getArtistById: $e');
+    return Left('Failed to fetch artist by ID: $e');
+  }
+}
 }

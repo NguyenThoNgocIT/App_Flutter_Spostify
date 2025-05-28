@@ -2,10 +2,12 @@ import 'package:dartz/dartz.dart';
 import 'package:spotify/data/sources/song/song_supabase_service.dart';
 import 'package:spotify/domain/repository/song/song.dart';
 import 'package:spotify/domain/entities/song/song.dart';
+import 'package:spotify/domain/entities/song/artist.dart';
 
 import '../../../service_locator.dart';
 
 class SongRepositoryImpl extends SongsRepository {
+  // ====== SONG FUNCTIONS (giữ nguyên) ======
   @override
   Future<Either<String, List<SongEntity>>> getNewsSongs() async {
     return await sl<SongSupabaseService>().getNewsSongs();
@@ -29,5 +31,16 @@ class SongRepositoryImpl extends SongsRepository {
   @override
   Future<Either<String, List<SongEntity>>> getUserFavoriteSongs() async {
     return await sl<SongSupabaseService>().getUserFavoriteSongs();
+  }
+
+  // ====== ARTIST FUNCTIONS (mới thêm) ======
+  @override
+  Future<Either<String, List<ArtistEntity>>> getArtists() async {
+    return await sl<SongSupabaseService>().getArtists();
+  }
+
+  @override
+  Future<Either<String, ArtistEntity>> getArtistById(String id) async {
+    return await sl<SongSupabaseService>().getArtistById(id);
   }
 }
