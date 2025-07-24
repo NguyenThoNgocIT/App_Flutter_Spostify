@@ -24,7 +24,6 @@ dependencies:
   cloudinary_api: ^1.0.0
   supabase_flutter: ^2.8.4
   equatable: ^2.0.5
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

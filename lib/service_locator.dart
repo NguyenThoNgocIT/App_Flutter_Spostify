@@ -9,11 +9,20 @@ import 'package:spotify/domain/usecases/song/get_favorite_songs.dart';
 import 'package:spotify/domain/usecases/song/get_news_songs.dart';
 import 'package:spotify/domain/usecases/song/get_play_list.dart';
 import 'package:spotify/domain/usecases/song/is_favorite_song.dart';
+import 'package:spotify/domain/usecases/podcast/get_podcasts.dart';
 
 import 'data/repository/song/song_repository_impl.dart';
 import 'data/sources/song/song_supabase_service.dart';
 import 'domain/repository/song/song.dart';
+
+import 'data/repository/podcast/podcast_repository_impl.dart';
+import 'data/sources/podcast/podcast_supabase_service.dart';
+import 'domain/repository/podcast/podcast.dart';
 import 'domain/usecases/auth/sigin.dart';
+import 'package:spotify/domain/usecases/song/get_albums.dart';
+import 'package:spotify/domain/usecases/song/get_album_songs.dart';
+import 'package:spotify/domain/usecases/song/get_artist_by_id.dart'; // công
+import 'package:spotify/domain/usecases/song/get_artists.dart'; // công
 
 final sl = GetIt.instance;
 
@@ -38,4 +47,17 @@ Future<void> initializeDependencies() async {
       AddOrRemoveFavoriteSongUseCase());
   sl.registerSingleton<IsFavoriteSongUseCase>(IsFavoriteSongUseCase());
   sl.registerSingleton<GetFavoriteSongsUseCase>(GetFavoriteSongsUseCase());
+  sl.registerSingleton<GetAlbumsUseCase>(GetAlbumsUseCase());
+  sl.registerSingleton<GetAlbumSongsUseCase>(GetAlbumSongsUseCase());
+
+// Register podcast use cases
+  sl.registerSingleton<PodcastSupabaseService>(PodcastSupabaseServiceImpl());
+  sl.registerSingleton<PodcastsRepository>(PodcastRepositoryImpl());
+  sl.registerSingleton<GetPodcastsUseCase>(GetPodcastsUseCase());
+
+  // Register artist use cases
+  sl.registerSingleton<GetArtistsUseCase>(
+      GetArtistsUseCase(sl<SongSupabaseService>())); // công
+  sl.registerSingleton<GetArtistByIdUseCase>(
+      GetArtistByIdUseCase(sl<SongSupabaseService>())); // công
 }

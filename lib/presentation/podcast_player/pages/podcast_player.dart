@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/common/widgets/appbar/app_bar.dart';
-import 'package:spotify/domain/entities/song/song.dart';
+import 'package:spotify/domain/entities/podcast/podcast.dart';
 import 'package:spotify/presentation/song_player/bloc/song_player_cubit.dart';
 import 'package:spotify/presentation/song_player/bloc/song_player_state.dart';
-
-
-import '../../../common/widgets/favorite_button/favorite_button.dart';
 import '../../../core/configs/constants/app_urls.dart';
 import '../../../core/configs/theme/app_colors.dart';
 
-
-class SongPlayerPage extends StatelessWidget {
-  final SongEntity songEntity;
-  const SongPlayerPage({required this.songEntity, super.key});
+class PodcastPlayerPage extends StatelessWidget {
+  final PodcastEntity podcastEntity;
+  const PodcastPlayerPage({required this.podcastEntity, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,68 +26,68 @@ class SongPlayerPage extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (_) => SongPlayerCubit()
-          ..loadSong(AppURLs.getSongURL(songEntity.filename ?? '')),
+          ..loadSong(AppURLs.getSongURL('${podcastEntity.audioUrl}')),
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           child: Column(
             children: [
-              _songCover(),
+              _podcastCover(),
               const SizedBox(height: 20),
-              _songDetail(),
+              _podcastDetail(),
               const SizedBox(height: 30),
-              _songPlayer(context),
+              _podcastPlayer(context),
             ],
           ),
         ),
       ),
-
     );
   }
 
-  Widget _songCover() {
-  final coverURL = songEntity.coverfilename?.isNotEmpty == true
-      ? AppURLs.getCoverURL(songEntity.coverfilename!)
-      : AppURLs.defaultImage;
-
-  print('Cover image URL: $coverURL');
-
-  return Container(
-    height: 300,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(30),
-      image: DecorationImage(
-        fit: BoxFit.cover,
-        image: NetworkImage(coverURL),
+  Widget _podcastCover() {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: NetworkImage(
+            AppURLs.getCoverURL('${podcastEntity.coverfilename}'),
+          ),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  Widget _songDetail() {
+  Widget _podcastDetail() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              songEntity.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              songEntity.artist,
-              style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
-            ),
-          ],
+        Expanded(
+          // Giới hạn chiều rộng của Column
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                podcastEntity.title,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+                overflow: TextOverflow.ellipsis, // Cắt chữ nếu quá dài
+              ),
+              const SizedBox(height: 5),
+              Text(
+                podcastEntity.host,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-        FavoriteButton(songEntity: songEntity),
       ],
     );
   }
 
-  Widget _songPlayer(BuildContext context) {
+  Widget _podcastPlayer(BuildContext context) {
     return BlocBuilder<SongPlayerCubit, SongPlayerState>(
       builder: (context, state) {
         if (state is SongPlayerLoading) {
